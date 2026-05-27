@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>sglang log report — {{ log_path }}</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 1100px; margin: 24px auto; padding: 0 16px; color: #222; line-height: 1.5; }
+  h1 { font-size: 22px; margin-bottom: 4px; }
+  h2 { font-size: 18px; margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  h3 { font-size: 15px; margin-top: 20px; }
+  .meta { color: #666; font-size: 13px; margin-bottom: 16px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #eef; color: #224; font-size: 12px; margin-right: 4px; }
+  .badge.pd { background: #fee; color: #822; }
+  .badge.mtp { background: #efe; color: #282; }
+  .badge.radix { background: #ffe; color: #872; }
+  .badge.log_requests { background: #eef6ff; color: #245; }
+  table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 10px 0; }
+  th, td { border: 1px solid #ddd; padding: 4px 8px; text-align: left; }
+  th { background: #f6f6f6; }
+  .flag-warn { background: #fff3cd; }
+  .flag-critical { background: #f8d7da; }
+  .sev-warn { color: #856404; font-weight: bold; }
+  .sev-critical { color: #721c24; font-weight: bold; }
+  .chart { margin: 12px 0; }
+  .chart img { max-width: 100%; border: 1px solid #eee; border-radius: 4px; }
+  .narrative { background: #fafafa; border-left: 4px solid #888; padding: 8px 12px; margin: 12px 0; }
+  .narrative.critical { border-color: #c33; }
+  .narrative.warn { border-color: #d80; }
+  .errlines { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; background: #f2f2f2; padding: 6px; white-space: pre-wrap; word-break: break-all; }
+  .appendix { max-height: 400px; overflow: auto; border: 1px solid #ccc; padding: 6px; font-size: 11px; }
+  footer { margin-top: 32px; padding-top: 8px; border-top: 1px solid #ddd; color: #888; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<h1>sglang log report</h1>
+<div class="meta">
+  Source: <code>{{ log_path }}</code><br>
+  Time range: {{ time_range }} &middot; {{ bucket_count }} bucket(s) &middot; {{ events_total }} events parsed &middot; {{ parse_errors }} parse errors<br>
+  Modes detected:
+  {% for m in modes %}<span class="badge {{ m }}">{{ m }}</span>{% endfor %}
+  {% if single_bucket %}<span class="badge">single-window mode</span>{% endif %}
+</div>
+
+<h2>Anomaly summary</h2>
+{% if anomaly_rows %}
+<table>
+  <thead><tr><th>Bucket</th><th>Flag</th><th>Severity</th><th>Threshold</th></tr></thead>
+  <tbody>
+  {% for r in anomaly_rows %}
+    {% for name, label, sev, expr in r.flags %}
+    <tr class="flag-{{ sev }}">
+      <td>{{ r.bucket_start }}</td>
+      <td>{{ label }} <code>({{ name }})</code></td>
+      <td class="sev-{{ sev }}">{{ sev }}</td>
+      <td><code>{{ expr }}</code></td>
+    </tr>
+    {% endfor %}
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p><em>No anomalies detected. All buckets clean.</em></p>
+{% endif %}
+
+{% if charts.throughput %}
+<h2>Throughput</h2>
+<div class="chart"><img src="data:image/png;base64,{{ charts.throughput }}"></div>
+{% endif %}
+{% if charts.queue %}
+<h2>Queue depth</h2>
+<div class="chart"><img src="data:image/png;base64,{{ charts.queue }}"></div>
+{% endif %}
+{% if charts.token_usage %}
+<h2>KV cache token usage</h2>
+<div class="chart"><img src="data:image/png;base64,{{ charts.token_usage }}"></div>
+{% endif %}
+{% if charts.cache %}
+<h2>Radix cache</h2>
+<div class="chart"><img src="data:image/png;base64,{{ charts.cache }}"></div>
+{% endif %}
+{% if charts.pd_transfer or charts.pd_retracted %}
+<h2>PD disaggregation</h2>
+{% if charts.pd_transfer %}<div class="chart"><img src="data:image/png;base64,{{ charts.pd_transfer }}"></div>{% endif %}
+{% if charts.pd_retracted %}<div class="chart"><img src="data:image/png;base64,{{ charts.pd_retracted }}"></div>{% endif %}
+{% endif %}
+{% if charts.mtp_accept or charts.mtp_acceptlen %}
+<h2>Speculative decoding (MTP/EAGLE)</h2>
+{% if charts.mtp_accept %}<div class="chart"><img src="data:image/png;base64,{{ charts.mtp_accept }}"></div>{% endif %}
+{% if charts.mtp_acceptlen %}<div class="chart"><img src="data:image/png;base64,{{ charts.mtp_acceptlen }}"></div>{% endif %}
+{% endif %}
+{% if charts.ttft or charts.e2e %}
+<h2>Request-level latency (--log-requests)</h2>
+{% if charts.ttft %}<div class="chart"><img src="data:image/png;base64,{{ charts.ttft }}"></div>{% endif %}
+{% if charts.e2e %}<div class="chart"><img src="data:image/png;base64,{{ charts.e2e }}"></div>{% endif %}
+{% endif %}
+
+{% if single_bucket %}
+<h2>Per-event detail (single window)</h2>
+{% if charts.gen_tps_scatter %}<div class="chart"><img src="data:image/png;base64,{{ charts.gen_tps_scatter }}"></div>{% endif %}
+{% if charts.token_usage_scatter %}<div class="chart"><img src="data:image/png;base64,{{ charts.token_usage_scatter }}"></div>{% endif %}
+{% if charts.ttft_hist %}<div class="chart"><img src="data:image/png;base64,{{ charts.ttft_hist }}"></div>{% endif %}
+{% if charts.e2e_hist %}<div class="chart"><img src="data:image/png;base64,{{ charts.e2e_hist }}"></div>{% endif %}
+{% endif %}
+
+{% if anomaly_rows %}
+<h2>Per-bucket narrative</h2>
+{% for r in anomaly_rows %}
+{% set worst = 'critical' if r.flags | selectattr(2, 'equalto', 'critical') | list | length > 0 else 'warn' %}
+<div class="narrative {{ worst }}">
+  <strong>{{ r.bucket_start }}</strong> — flags fired:
+  {% for name, label, sev, expr in r.flags %}
+    <span class="sev-{{ sev }}">{{ label }}</span>{% if not loop.last %}, {% endif %}
+  {% endfor %}
+  <ul style="margin: 6px 0; padding-left: 18px;">
+    {% for k, v in r.metrics.items() %}
+      {% if v is not none and (v == v) %}<li><code>{{ k }}</code> = {{ v | fnum }}</li>{% endif %}
+    {% endfor %}
+  </ul>
+</div>
+{% endfor %}
+{% endif %}
+
+{% if pd_error_samples %}
+<h2>PD error / retraction log samples</h2>
+<div class="errlines">{% for line in pd_error_samples %}{{ line }}
+{% endfor %}</div>
+{% endif %}
+
+<h2>Appendix: hourly CSV</h2>
+<div class="appendix">
+<table>
+<thead><tr>{% for col in csv_columns %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+<tbody>
+{% for row in csv_rows %}
+<tr>{% for col in csv_columns %}<td>{{ row[col] }}</td>{% endfor %}</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<footer>
+  Generated by sglang-log-analyzer v{{ skill_version }} at {{ generated_at }}.
+  See <code>references/csv-schema.md</code> for column definitions and <code>references/html-report.md</code> for chart/flag interpretation.
+</footer>
+
+</body>
+</html>

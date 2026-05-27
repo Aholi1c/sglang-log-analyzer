@@ -1,0 +1,15 @@
+[2026-05-27 19:55:01 TP0] Prefill batch. #new-seq: 4, #new-token: 1024, #cached-token: 0, cache hit rate: 0.00%, token usage: 0.12, #running-req: 4, #queue-req: 12, #pending-token: 3072, cuda graph: True, input throughput (token/s): 12345.67
+[2026-05-27 19:55:42 TP0] Decode batch. #running-req: 4, #token: 4096, token usage: 0.18, accept len: 2.40, accept rate: 0.82, cuda graph: True, gen throughput (token/s): 3500.10, #queue-req: 7
+[2026-05-27 19:56:55 TP0] Decode batch. #running-req: 12, #token: 12288, token usage: 0.55, accept len: 2.35, accept rate: 0.80, cuda graph: True, gen throughput (token/s): 4200.55, #queue-req: 4
+[2026-05-27 19:57:30 TP0] Decode batch. #running-req: 14, #token: 14336, token usage: 0.61, accept len: 2.45, accept rate: 0.84, cuda graph: True, gen throughput (token/s): 4310.81, #queue-req: 2
+[2026-05-27 19:58:30 TP0] Decode batch. #running-req: 15, #token: 14848, token usage: 0.64, accept len: 2.50, accept rate: 0.85, cuda graph: True, gen throughput (token/s): 4350.13, #queue-req: 0
+[2026-05-27 19:59:42 TP0] Decode batch. #running-req: 15, #token: 15104, token usage: 0.65, accept len: 2.48, accept rate: 0.84, cuda graph: True, gen throughput (token/s): 4412.07, #queue-req: 0
+[2026-05-27 20:00:10 TP0] Prefill batch. #new-seq: 5, #new-token: 1280, #cached-token: 320, cache hit rate: 20.00%, token usage: 0.68, #running-req: 18, #queue-req: 4, #pending-token: 1024, cuda graph: True, input throughput (token/s): 17890.44
+[2026-05-27 20:00:48 TP0] Decode batch. #running-req: 18, #token: 16384, token usage: 0.71, accept len: 1.30, accept rate: 0.41, cuda graph: True, gen throughput (token/s): 1620.18, #queue-req: 3
+[2026-05-27 20:02:01 TP0] Decode batch. #running-req: 22, #token: 18432, token usage: 0.78, accept len: 1.28, accept rate: 0.40, cuda graph: True, gen throughput (token/s): 1680.42, #queue-req: 5
+[2026-05-27 20:02:45 TP0] Decode batch. #running-req: 22, #token: 19456, token usage: 0.80, accept len: 1.32, accept rate: 0.42, cuda graph: True, gen throughput (token/s): 1705.66, #queue-req: 5
+[2026-05-27 20:03:30 TP0] Prefill batch. #new-seq: 4, #new-token: 1024, #cached-token: 256, cache hit rate: 20.00%, token usage: 0.82, #running-req: 24, #queue-req: 7, #pending-token: 1536, cuda graph: True, input throughput (token/s): 18105.93
+[2026-05-27 20:04:08 TP0] Decode batch. #running-req: 24, #token: 21504, token usage: 0.84, accept len: 1.35, accept rate: 0.43, cuda graph: True, gen throughput (token/s): 1780.55, #queue-req: 6
+[2026-05-27 20:05:00 TP0] Decode batch. #running-req: 24, #token: 22528, token usage: 0.85, accept len: 1.30, accept rate: 0.41, cuda graph: True, gen throughput (token/s): 1820.71, #queue-req: 6
+[2026-05-27 20:06:00 TP0] Decode batch. #running-req: 24, #token: 22656, token usage: 0.86, accept len: 1.32, accept rate: 0.42, cuda graph: True, gen throughput (token/s): 1830.20, #queue-req: 6
+[2026-05-27 20:08:00 TP0] Decode batch. #running-req: 24, #token: 22790, token usage: 0.86, accept len: 1.28, accept rate: 0.40, cuda graph: True, gen throughput (token/s): 1850.20, #queue-req: 6

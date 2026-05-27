@@ -1,0 +1,20 @@
+[2026-05-27 19:55:01 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-001', input_ids=[1, 2, 3], sampling_params={'temperature': 0.7})
+[2026-05-27 19:55:03 TP0] Finish: obj=..., out={'rid': 'req-001', 'prompt_tokens': 128, 'completion_tokens': 64, 'cached_tokens': 0, 'e2e_latency': 1.823, 'ttft': 0.412}
+[2026-05-27 19:55:10 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-002', input_ids=[1, 2, 3, 4], sampling_params={'temperature': 0.8})
+[2026-05-27 19:55:14 TP0] Finish: obj=..., out={'rid': 'req-002', 'prompt_tokens': 256, 'completion_tokens': 128, 'cached_tokens': 64, 'e2e_latency': 3.221, 'ttft': 0.601}
+[2026-05-27 19:56:05 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-003', input_ids=[1, 2], sampling_params={'temperature': 0.5})
+[2026-05-27 19:56:09 TP0] Finish: obj=..., out={'rid': 'req-003', 'prompt_tokens': 200, 'completion_tokens': 200, 'cached_tokens': 100, 'e2e_latency': 4.150, 'ttft': 0.380}
+[2026-05-27 19:58:00 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-004', input_ids=[1, 2, 3], sampling_params={'temperature': 0.7})
+[2026-05-27 19:58:02 TP0] Finish: obj=..., out={'rid': 'req-004', 'prompt_tokens': 150, 'completion_tokens': 50, 'cached_tokens': 30, 'e2e_latency': 1.520, 'ttft': 0.295}
+[2026-05-27 19:59:00 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-005', input_ids=[1, 2, 3, 4, 5], sampling_params={'temperature': 0.9})
+[2026-05-27 19:59:08 TP0] Finish: obj=..., out={'rid': 'req-005', 'prompt_tokens': 400, 'completion_tokens': 256, 'cached_tokens': 100, 'e2e_latency': 7.821, 'ttft': 0.825}
+[2026-05-27 20:00:05 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-006', input_ids=[1, 2], sampling_params={'temperature': 0.7})
+[2026-05-27 20:00:14 TP0] Finish: obj=..., out={'rid': 'req-006', 'prompt_tokens': 320, 'completion_tokens': 220, 'cached_tokens': 80, 'e2e_latency': 8.512, 'ttft': 5.521}
+[2026-05-27 20:01:10 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-007', input_ids=[1, 2, 3], sampling_params={'temperature': 0.7})
+[2026-05-27 20:01:23 TP0] Finish: obj=..., out={'rid': 'req-007', 'prompt_tokens': 512, 'completion_tokens': 256, 'cached_tokens': 128, 'e2e_latency': 12.301, 'ttft': 6.122}
+[2026-05-27 20:02:30 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-008', input_ids=[1, 2], sampling_params={'temperature': 0.5})
+[2026-05-27 20:02:45 TP0] Finish: obj=..., out={'rid': 'req-008', 'prompt_tokens': 600, 'completion_tokens': 300, 'cached_tokens': 200, 'e2e_latency': 14.221, 'ttft': 7.012}
+[2026-05-27 20:04:00 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-009', input_ids=[1, 2, 3], sampling_params={'temperature': 0.7})
+[2026-05-27 20:04:18 TP0] Finish: obj=..., out={'rid': 'req-009', 'prompt_tokens': 700, 'completion_tokens': 400, 'cached_tokens': 250, 'e2e_latency': 17.521, 'ttft': 8.221}
+[2026-05-27 20:06:00 TP0] Receive: obj=TokenizedGenerateReqInput(rid='req-010', input_ids=[1, 2], sampling_params={'temperature': 0.6})
+[2026-05-27 20:06:21 TP0] Finish: obj=..., out={'rid': 'req-010', 'prompt_tokens': 800, 'completion_tokens': 500, 'cached_tokens': 300, 'e2e_latency': 20.421, 'ttft': 9.521}
