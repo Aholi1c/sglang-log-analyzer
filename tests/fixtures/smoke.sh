@@ -54,6 +54,7 @@ run pd
 run mtp
 run radix
 run log_requests
+run real_meta
 
 assert_no normal flag_retraction_spike
 assert_no normal flag_low_accept_rate
@@ -63,6 +64,8 @@ assert    pd flag_retraction_spike 1
 assert    mtp flag_low_accept_rate 1
 assert    radix flag_cache_collapse 1
 assert    log_requests flag_ttft_regression 1
+assert    real_meta requests_received 1
+assert    real_meta requests_finished 1
 
 echo
 echo "all assertions passed"

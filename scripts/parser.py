@@ -12,8 +12,8 @@ PREFIX_RE = re.compile(
     r'^\[(?P<ts>\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:[.,]\d+)?)'
     r'(?:\s+TP(?P<tp>\d+))?\]\s*'
 )
-PREFILL_RE = re.compile(r'Prefill batch\.\s*(?P<fields>.+?)\s*$')
-DECODE_RE = re.compile(r'Decode batch\.\s*(?P<fields>.+?)\s*$')
+PREFILL_RE = re.compile(r'Prefill batch(?:\s+\[\d+\])?[.,]\s*(?P<fields>.+?)\s*$')
+DECODE_RE = re.compile(r'Decode batch(?:\s+\[\d+\])?[.,]\s*(?P<fields>.+?)\s*$')
 RECEIVE_RE = re.compile(
     r"Receive(?:\sOpenAI)?:\s*obj=(?P<obj>.+?)(?:,\s*headers=.*)?\s*$"
 )
@@ -97,6 +97,18 @@ def tokenize_fields(blob: str) -> dict:
     return out
 
 
+def _first_present(*values):
+    for value in values:
+        if value is not None:
+            return value
+    return None
+
+
+def _ms_from_seconds(value):
+    n = _num(value)
+    return n * 1000 if n is not None else None
+
+
 def _parse_ts(raw: str) -> datetime | None:
     raw = raw.replace('T', ' ').replace(',', '.')
     for fmt in ('%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S'):
@@ -138,16 +150,17 @@ def parse_line(line: str, fallback_ts: datetime | None = None) -> dict | None:
         try:
             out = ast.literal_eval(fm.group('out'))
             if isinstance(out, dict):
+                meta = out.get('meta_info') if isinstance(out.get('meta_info'), dict) else {}
                 normalized = {
                     'ts': ts,
                     'tp_rank': tp_rank,
                     'event_type': 'finish',
-                    'rid': out.get('rid'),
-                    'e2e_latency_ms': _num(out.get('e2e_latency')) * 1000 if out.get('e2e_latency') is not None else None,
-                    'ttft_ms': _num(out.get('ttft')) * 1000 if out.get('ttft') is not None else None,
-                    'cached_tokens': _num(out.get('cached_tokens')),
-                    'completion_tokens': _num(out.get('completion_tokens')),
-                    'prompt_tokens': _num(out.get('prompt_tokens')),
+                    'rid': _first_present(out.get('rid'), meta.get('id')),
+                    'e2e_latency_ms': _ms_from_seconds(_first_present(out.get('e2e_latency'), meta.get('e2e_latency'))),
+                    'ttft_ms': _ms_from_seconds(_first_present(out.get('ttft'), meta.get('ttft'))),
+                    'cached_tokens': _num(_first_present(out.get('cached_tokens'), meta.get('cached_tokens'))),
+                    'completion_tokens': _num(_first_present(out.get('completion_tokens'), meta.get('completion_tokens'))),
+                    'prompt_tokens': _num(_first_present(out.get('prompt_tokens'), meta.get('prompt_tokens'))),
                 }
                 return normalized
         except (ValueError, SyntaxError):
@@ -208,6 +221,7 @@ def parse_file(
     p = Path(path) if path != '-' else None
     stats = ParseStats()
     events: list[dict] = []
+    pending_without_ts: list[dict] = []
     last_ts: datetime | None = None
     synthetic_ts = datetime(1970, 1, 1)
 
@@ -230,8 +244,15 @@ def parse_file(
                 ev['ts'] = synthetic_ts
                 synthetic_ts = synthetic_ts + timedelta(seconds=assume_interval)
             else:
+                pending_without_ts.append(ev)
                 continue
         else:
+            if last_ts is None and pending_without_ts:
+                for pending in pending_without_ts:
+                    pending['ts'] = ev['ts']
+                    stats.matched += 1
+                    events.append(pending)
+                pending_without_ts.clear()
             last_ts = ev['ts']
         stats.matched += 1
         events.append(ev)

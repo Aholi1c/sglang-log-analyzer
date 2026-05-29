@@ -1,0 +1,4 @@
+Receive: obj=GenerateReqInput(rid='real-001', sampling_params={'max_new_tokens': 50})
+[2026-05-27 05:31:40] Prefill batch, #new-seq: 1, #new-token: 8, #cached-token: 0, token usage: 0.00, #running-req: 0, #queue-req: 0, cuda graph: True, input throughput (token/s): 0.14
+[2026-05-27 05:31:41] Decode batch, #running-req: 1, #token: 37, token usage: 0.01, cuda graph: True, gen throughput (token/s): 250.00, #queue-req: 0
+Finish: obj=GenerateReqInput(rid='real-001'), out={'meta_info': {'id': 'real-001', 'prompt_tokens': 8, 'completion_tokens': 29, 'cached_tokens': 0, 'e2e_latency': 0.18361688405275345}}
