@@ -7,6 +7,8 @@ It parses dense SGLang scheduler logs into an hourly CSV and a self-contained HT
 ## What it does
 
 - Parses `Prefill batch`, `Decode batch`, `Receive`, `Finish`, and `KVTransferError` log lines.
+- Supports both older `Prefill batch.` / `Decode batch.` lines and newer `Prefill batch,` / `Decode batch,` lines, including optional forward-iteration ids such as `Prefill batch [123],`.
+- Reads `--log-requests` finish metrics from either flat `out={...}` fields or newer nested `out['meta_info']` fields.
 - Detects normal, PD-disaggregation, MTP/speculative decoding, radix-cache, and `--log-requests` modes.
 - Buckets events by hour, or by a requested single hour / time range.
 - Generates a CSV with throughput, queue depth, KV usage, cache hit rate, latency, and anomaly flags.
@@ -50,6 +52,7 @@ sglang-log-analyzer/
         ├── normal.log
         ├── pd.log
         ├── radix.log
+        ├── real_meta.log
         └── smoke.sh
 ```
 
@@ -261,7 +264,7 @@ Known SGLang issue: when MTP is enabled, `--log-requests` may emit per-request `
 | Symptom | What to check |
 |---------|---------------|
 | `uv: command not found` | Install `uv`, then open a new shell. |
-| `no parseable sglang log lines found` | Confirm the log contains `Prefill batch` or `Decode batch` lines. |
+| `no parseable sglang log lines found` | Confirm the log contains `Prefill batch`, `Decode batch`, `Receive`, or `Finish` lines. |
 | The wrong mode was detected | Use `--mode pd`, `--mode mtp`, or a comma-separated value such as `--mode pd,mtp`. |
 | The log has no timestamps | Use `--assume-interval SECS`. |
 | Some CSV columns are empty | This is expected when the related mode is not active. |
@@ -282,7 +285,7 @@ Expected result:
 all assertions passed
 ```
 
-The smoke test runs the analyzer on all bundled fixtures and checks that the expected anomaly flags fire.
+The smoke test runs the analyzer on all bundled fixtures, including the newer nested `meta_info` request-log shape, and checks that the expected anomaly flags or request counters fire.
 
 ## References
 

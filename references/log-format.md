@@ -1,14 +1,15 @@
 # sglang log line formats
 
-Reference for every line shape this skill parses. The parser is two-stage (anchor regex + key-value tokenizer) so field-order changes between sglang versions don't break it — the tables below describe what each field *means*, not the order it appears in. The parser accepts both `Prefill batch.` / `Decode batch.` and newer `Prefill batch,` / `Decode batch,` punctuation.
+Reference for every line shape this skill parses. The parser is two-stage (anchor regex + key-value tokenizer) so field-order changes between sglang versions don't break it — the tables below describe what each field *means*, not the order it appears in. The parser accepts both `Prefill batch.` / `Decode batch.` and newer `Prefill batch,` / `Decode batch,` punctuation, plus optional forward-iteration ids such as `Prefill batch [123],`.
 
-Log prefix on every line: `[YYYY-MM-DD HH:MM:SS TPn]`. The `TPn` is the tensor-parallel rank emitting the line; the parser captures it into a `tp_rank` column but does not use it for hour bucketing.
+Common log prefix: `[YYYY-MM-DD HH:MM:SS TPn]`. The `TPn` tensor-parallel rank is optional; when present, the parser captures it into a `tp_rank` column but does not use it for hour bucketing. Lines without a timestamp inherit the previous parsed timestamp; if they appear before the first timestamp, they are assigned to the first following timestamp bucket. Use `--assume-interval` only for logs with no usable timestamps at all.
 
 ## Prefill batch line
 
 ```
 [2025-05-27 20:14:33 TP0] Prefill batch. #new-seq: 4, #new-token: 1024, #cached-token: 256, cache hit rate: 25.00%, token usage: 0.41, #running-req: 12, #queue-req: 5, #pending-token: 1024, cuda graph: True, input throughput (token/s): 18722.30
 [2025-05-27 20:14:33] Prefill batch, #new-seq: 4, #new-token: 1024, #cached-token: 256, token usage: 0.41, #running-req: 12, #queue-req: 5, cuda graph: True, input throughput (token/s): 18722.30
+[2025-05-27 20:14:33] Prefill batch [123], #new-seq: 4, #new-token: 1024, token usage: 0.41, #running-req: 12, #queue-req: 5, input throughput (token/s): 18722.30
 ```
 
 Source: `python/sglang/srt/managers/scheduler_components/metrics_reporter.py::report_prefill_stats`. Fires on each prefill batch when stats logging is on.
@@ -36,6 +37,7 @@ Source: `python/sglang/srt/managers/scheduler_components/metrics_reporter.py::re
 ```
 [2025-05-27 20:14:38 TP0] Decode batch. #running-req: 18, #token: 16384, token usage: 0.71, accept len: 2.40, accept rate: 0.84, pre-allocated usage: 0.28, #prealloc-req: 5, #transfer-req: 3, #retracted-req: 0, cuda graph: True, gen throughput (token/s): 2520.18, #queue-req: 3
 [2025-05-27 20:14:38] Decode batch, #running-req: 18, #token: 16384, token usage: 0.71, cuda graph: True, gen throughput (token/s): 2520.18, #queue-req: 3
+[2025-05-27 20:14:38] Decode batch [124], #running-req: 18, #token: 16384, token usage: 0.71, cuda graph: True, gen throughput (token/s): 2520.18, #queue-req: 3
 ```
 
 Source: same `metrics_reporter.py::report_decode_stats`. Fires every `--decode-log-interval` decode iterations (default 40).
@@ -75,6 +77,7 @@ There is also `Receive OpenAI: obj=...` for /v1/chat/completions and similar Ope
 
 ```
 [2025-05-27 20:00:14 TP0] Finish: obj=..., out={'rid': 'req-006', 'prompt_tokens': 320, 'completion_tokens': 220, 'cached_tokens': 80, 'e2e_latency': 8.512, 'ttft': 5.521}
+[2025-05-27 20:00:14] Finish: obj=..., out={'meta_info': {'id': 'req-006', 'prompt_tokens': 320, 'completion_tokens': 220, 'cached_tokens': 80, 'e2e_latency': 8.512}}
 ```
 
 Source: `python/sglang/srt/utils/request_logger.py::log_finished_request`. Fires once per request when generation completes or aborts. Parsed via `ast.literal_eval` on the `out=` dict.

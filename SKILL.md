@@ -13,7 +13,7 @@ Trigger phrases / signals:
 - "analyze sglang log", "review the sglang server log", "做小时级报表"
 - "why is throughput dropping at 20:00", "8-9点为什么慢"
 - "compare 14:00 vs 20:00", "look at queue depth yesterday"
-- A path ending in `.log` whose contents include `Prefill batch.` or `Decode batch.` lines.
+- A path ending in `.log` whose contents include `Prefill batch`, `Decode batch`, `Receive`, or `Finish` lines.
 
 Don't use for: live tailing (this is offline analysis), multi-day rollups (run per day, then diff), profiling kernel-level perf (sglang logs are scheduler-level only).
 
@@ -36,8 +36,8 @@ You don't need to write parsing code. The script handles every line shape in eve
 
 ## What the script does
 
-1. **Detects modes** by scanning the first ~5000 lines (PD if `#prealloc-req`/`#transfer-req` present; MTP if `accept rate` present; radix if `cache hit rate > 0` ever; log_requests if `Receive:`/`Finish:` lines present). Modes combine.
-2. **Parses** prefill, decode, receive, finish, and KVTransferError lines into per-event records. Field-order changes between sglang versions don't break parsing — it tokenizes key-value pairs after the line-shape anchor regex.
+1. **Detects modes** from parsed events (PD if `#prealloc-req`/`#transfer-req` present; MTP if `accept rate` present; radix if `cache hit rate > 0` ever; log_requests if `Receive:`/`Finish:` lines present). Modes combine.
+2. **Parses** prefill, decode, receive, finish, and KVTransferError lines into per-event records. Field-order changes between sglang versions don't break parsing — it tokenizes key-value pairs after the line-shape anchor regex. It accepts both `Prefill batch.` / `Decode batch.` and newer `Prefill batch,` / `Decode batch,` punctuation, optional forward-iteration ids such as `Prefill batch [123],`, and nested `out['meta_info']` request metrics.
 3. **Buckets** by hour (or scopes to `--hour`/`--range`/`--date`), computes mean/p50/p95/p99/max for each numeric field, plus `retracted_req_delta_sum` from the monotonic counter.
 4. **Renders** CSV (source of truth) and HTML (matplotlib PNGs base64-embedded — opens offline).
 
@@ -104,7 +104,7 @@ Stored as `0`/`1` in CSV for grep-ability. HTML highlights critical in red, warn
 
 ## Troubleshooting
 
-- **Empty CSV / "no parseable lines"**: log doesn't contain `Prefill batch`/`Decode batch` lines. sglang prints these at INFO; check `--log-level` upstream.
+- **Empty CSV / "no parseable lines"**: log doesn't contain `Prefill batch`, `Decode batch`, `Receive`, or `Finish` lines. sglang prints scheduler stats at INFO; check `--log-level` upstream, and enable `--log-requests` if request-level latency is needed.
 - **Mode mis-detected**: pass `--mode pd` (or comma-separated) to force.
 - **Timestamps absent**: pass `--assume-interval 1` to synthesize monotonic timestamps. Hour bucketing won't match wall-clock but relative order is preserved.
 - **Some columns NaN**: expected — mode-specific columns are NaN when the mode isn't active.
